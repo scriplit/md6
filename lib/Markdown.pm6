@@ -1,4 +1,5 @@
 module Markdown;
+#use Grammar::Tracer;
 
 grammar MarkDown {
 	token TOP { ^ <paragraph>* % [\n\n+] \n* $ }
@@ -24,7 +25,10 @@ grammar MarkDown {
 	token text { <char>+ }
 	token char { <amp_dirty> | <safechars> }
 	token amp_dirty { '&' <!before \w+\;> }
-	token safechars { <-[*`\n]> }
+	token safechars {
+	                | <-[*`\n]>
+                 	| \n <before <-[\n\-\=]>>
+		        }
 }
 
 class HTMLMaker {
@@ -41,13 +45,13 @@ class HTMLMaker {
 		make $/.values.[0].>>.ast.join;
 	}
 	method monospace($/) {
-		make '<code>' ~ $<text> ~ '</code>';
+		make '<code>' ~ $<text>.ast ~ '</code>';
 	}
 	method bold($/) {
-		make '<strong>' ~ $<text> ~ '</strong>';
+		make '<strong>' ~ $<text>.ast ~ '</strong>';
 	}
 	method italic($/) {
-		make '<em>' ~ $<text> ~ '</em>';
+		make '<em>' ~ $<text>.ast ~ '</em>';
 	}
 	method spanseq($/) {
 		make $/.values.[0].ast;
@@ -60,15 +64,15 @@ class HTMLMaker {
 	}
 	method h_setext($/) {
 		if (~$<underline>).ord == '='.ord {
-			make '<h1>' ~ $<text> ~ "</h1>\n";
+			make '<h1>' ~ $<text>.ast ~ "</h1>\n";
 		}
 		else {
-			make '<h2>' ~ $<text> ~ "</h2>\n";
+			make '<h2>' ~ $<text>.ast ~ "</h2>\n";
 		}
 	}
 	method h_dashed($/) {
 		my $h = 'h' ~ $<dashes>.chars;
-		make "<$h>" ~ $<text> ~ "</$h>\n";
+		make "<$h>" ~ $<text>.ast ~ "</$h>\n";
 	}
 	method header($/) {
 		make $/.values.[0].ast;
