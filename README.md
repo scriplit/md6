@@ -14,4 +14,3 @@ How
 ===
 
 `perl6 -I lib bin/markdown README.md`
-

@@ -2,6 +2,12 @@
 use Markdown;
 
 sub MAIN (Cool $path) {
-	mdfile_to_htmlfile($path, $path ~ '.html');
+	my $outfile = $path ~ '.html';
+	my $ok = mdfile_to_htmlfile($path, $outfile);
+	if $ok {
+		say "Output written to $outfile.";
+	} else {
+		say "An error occured.";
+	}
 }
 

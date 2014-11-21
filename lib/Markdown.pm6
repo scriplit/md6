@@ -23,11 +23,13 @@ grammar MarkDown {
 	token italic { '*' ~ '*' <text> }
 	token monospace { '`' ~ '`' <text> }
 	token text { <char>+ }
-	token char { <amp_dirty> | <safechars> }
+	token char { <amp_dirty> | <lt_dirty> | <safechars> }
 	token amp_dirty { '&' <!before \w+\;> }
+	token lt_dirty  { '<' }
 	token safechars {
-	                | <-[*`\n]>
+	                | <-[*`\n\#]>
                  	| \n <before <-[\n\-\=]>>
+			| '#' <!after ^>
 		        }
 }
 
@@ -37,6 +39,9 @@ class HTMLMaker {
 	}
 	method amp_dirty($/) {
 		make '&amp;';
+	}
+	method lt_dirty($/) {
+		make '&lt;';
 	}
 	method char($/) {
 		make $/.values[0].ast;
@@ -60,7 +65,7 @@ class HTMLMaker {
 		make ~$/ ~ "\n";
 	}
 	method mdblock($/) {
-		make '<p>' ~ $<spanseq>>>.ast ~ "</p>\n";
+		make '<p>' ~ $<spanseq>>>.ast.join ~ "</p>\n";
 	}
 	method h_setext($/) {
 		if (~$<underline>).ord == '='.ord {
@@ -78,10 +83,10 @@ class HTMLMaker {
 		make $/.values.[0].ast;
 	}
 	method paragraph($/) {
-		make $/.values.[0].ast ~ "\n";
+		make $/.values.[0].ast;
 	}
 	method TOP($/) {
-		make $<paragraph>>>.ast.join;
+		make $<paragraph>>>.ast.join("\n");
 	}
 }
 
