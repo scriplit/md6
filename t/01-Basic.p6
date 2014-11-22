@@ -139,6 +139,13 @@ use Markdown;
 	is $out, $html, "Original 1a!";
 }
 
+{
+	# span tags
+	my $txt = "A line with a <span>true</span> problem.";
+	my $html = "<p>" ~ $txt ~ "</p>\n";
+	my $out = md_to_html($txt);
+	is $out, $html, "Span tags in md blocks";
+}
 
 
 done;

@@ -25,7 +25,7 @@ grammar MarkDown {
 	token text { <char>+ }
 	token char { <amp_dirty> | <lt_dirty> | <safechars> }
 	token amp_dirty { '&' <!before \w+\;> }
-	token lt_dirty  { '<' }
+	token lt_dirty  { '<' <!before \/? \w+ <-[>]>* '>' > }
 	token safechars {
 	                | <-[*`\n\#]>
                  	| \n <before <-[\n\-\=]>>
