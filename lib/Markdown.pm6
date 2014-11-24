@@ -9,7 +9,8 @@ grammar MarkDown {
 	token underline { ('-' || '=')+ }
 	token h_dashed { <dashes> \s+ <text>  }
 	token dashes { ('#'+!) }
-	token mdblock { <spanseq>* }
+	token mdblock { <mdline>* % [\n <!before \n>] }
+	token mdline { <spanseq>+ }
 	token html { '<' 
                      (
 		     || 'div'
@@ -28,7 +29,7 @@ grammar MarkDown {
 	token lt_dirty  { '<' <!before \/? \w+ <-[>]>* '>' > }
 	token safechars {
 	                | <-[*`\n\#]>
-                 	| \n <before <-[\n\-\=]>>
+			# | \n <before <-[\-\=]>>
 			| '#' <!after ^>
 		        }
 }
@@ -64,8 +65,11 @@ class HTMLMaker {
 	method html($/) {
 		make ~$/ ~ "\n";
 	}
+	method mdline($/) {
+		make $<spanseq>>>.ast.join;
+	}
 	method mdblock($/) {
-		make '<p>' ~ $<spanseq>>>.ast.join ~ "</p>\n";
+		make '<p>' ~ $<mdline>>>.ast.join(" ")  ~ "</p>\n";
 	}
 	method h_setext($/) {
 		if (~$<underline>).ord == '='.ord {

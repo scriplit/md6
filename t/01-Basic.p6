@@ -141,11 +141,26 @@ use Markdown;
 
 {
 	# span tags
-	my $txt = "A line with a <span>true</span> problem.";
+	my $txt = "A line with a <span class=\"blink\">true</span> problem.";
 	my $html = "<p>" ~ $txt ~ "</p>\n";
 	my $out = md_to_html($txt);
 	is $out, $html, "Span tags in md blocks";
 }
 
+{
+	# ampersand in urls
+	my $txt = "http://images.google.com/images?num=30&q=larry+wall";
+	my $html = "<p>http://images.google.com/images?"
+                   ~ "num=30&amp;q=larry+wall</p>\n";
+	my $out = md_to_html($txt);
+	is $out, $html, "Ampersand in URL";
+}
 
+{
+	# hard wrap allowance
+	my $txt = "Paragraph1 line1\nParagraph1 line1 cont.";
+	my $html = "<p>Paragraph1 line1 Paragraph1 line1 cont.</p>\n";
+	my $out = md_to_html($txt);
+	is $out, $html, "Hard wrap allowance";
+}
 done;
