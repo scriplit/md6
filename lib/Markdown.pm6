@@ -9,7 +9,10 @@ grammar MarkDown {
 	token underline { ('-' || '=')+ }
 	token h_dashed { <dashes> \s+ <text>  }
 	token dashes { ('#'+!) }
-	token mdblock { <mdline>* % [\n <!before \n>] }
+	token mdblock { <mdline>* %% <eol> }
+	token eol     { <brmark>? <softline>? }
+	token brmark  { \h ** 2..* }
+	token softline { \n <!before \n> }
 	token mdline { <spanseq>+ }
 	token html { '<' 
                      (
@@ -28,9 +31,9 @@ grammar MarkDown {
 	token amp_dirty { '&' <!before \w+\;> }
 	token lt_dirty  { '<' <!before \/? \w+ <-[>]>* '>' > }
 	token safechars {
-	                | <-[*`\n\#]>
-			# | \n <before <-[\-\=]>>
-			| '#' <!after ^>
+	                | <-[*`\n\#\h] >
+			| '#' <!after ^^ >
+			| \h <!before \h\n>
 		        }
 }
 
@@ -68,8 +71,21 @@ class HTMLMaker {
 	method mdline($/) {
 		make $<spanseq>>>.ast.join;
 	}
+	method brmark($/) {
+		make "<br/>\n";
+	}
+	method eol($/) {
+		make $/.values.[0].ast;
+	}
+	method softline($/) {
+		make " ";
+	}
 	method mdblock($/) {
-		make '<p>' ~ $<mdline>>>.ast.join(" ")  ~ "</p>\n";
+		my $string;
+		loop (my $i=0; $i < $<mdline>.elems; $i++) {
+			$string ~= $<mdline>[$i].ast ~ $<eol>[$i].ast;
+		}
+		make '<p>' ~ $string  ~ "</p>\n";
 	}
 	method h_setext($/) {
 		if (~$<underline>).ord == '='.ord {

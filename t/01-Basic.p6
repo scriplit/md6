@@ -163,4 +163,13 @@ use Markdown;
 	my $out = md_to_html($txt);
 	is $out, $html, "Hard wrap allowance";
 }
+
+{
+	# explicit br
+	my $txt = "line1   \nline2";
+	my $html = "<p>line1 <br/>\nline2</p>\n";
+	my $out = md_to_html($txt);
+	is $out, $html, "Explicit br";
+}
+
 done;
